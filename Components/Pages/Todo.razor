@@ -1,0 +1,71 @@
+﻿@using BlazorApp1.Data
+@using Microsoft.EntityFrameworkCore
+@inject AppDbContext db
+@page "/todo"
+@attribute [StreamRendering]
+@rendermode InteractiveServer
+
+
+<PageTitle>To-Do</PageTitle>
+
+<h1>To-Do List</h1>
+
+<p>This component demonstrates basic CRUD.</p>
+
+<table class="table">
+        <thead>
+            <tr>
+                <th>Done?</th>
+                <th>Task</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var todo in todos){
+               <tr>
+                   <td>
+                       <span style = "cursor: pointer" @onclick="() => clickedDone(todo)">
+                            @(todo.Done ?  "✔️" : "❌")
+                       </span>
+                   </td>
+                   <td>
+                       <input @bind = "todo.Task" class = "form-control" />
+                   </td>
+                   <td>
+                        <span style = "cursor: pointer; color: red;" @onclick="() => deleteTask(todo)">
+                            X
+                        </span>
+                    </td>
+               </tr>
+            }
+        </tbody>
+</table>
+
+<center><button class="myButton" @onclick="addTask">Add Task</button></center>
+
+@code{
+    private List<Item> todos = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        todos = await db.Todos.ToListAsync();
+    }
+
+    private async Task clickedDone(Item item){
+        item.Done = !item.Done;
+        db.Todos.Update(item);
+        await db.SaveChangesAsync();
+    }
+
+    private async Task addTask(){
+        var newItem = new Item { Done = false, Task = "Type Here" };
+        db.Todos.Add(newItem);
+        await db.SaveChangesAsync();
+        todos = await db.Todos.ToListAsync();
+    }
+
+    private async Task deleteTask(Item item){
+        db.Todos.Remove(item);
+        await db.SaveChangesAsync();
+        todos = await db.Todos.ToListAsync();
+    }
+}
