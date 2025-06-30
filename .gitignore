@@ -21,6 +21,7 @@ rad.json
 #Test results file
 TestResults.xml
 .vs/
+*.suo
 bin/
 obj/
 *.db
